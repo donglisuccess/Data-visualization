@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="../static/css/index.css">
+</head>
+
+<body>
+  <!-- 在这里设置表头 -->
+  <header>
+    <h1>新冠疫情可视化数据</h1>
+    <showTime></showTime>
+    <search class=".search">
+      <form action="http://127.0.0.1:5000/city" method="get">
+        <label for="pro"></label>
+        <input type="text" placeholder="请输入您要搜索的省份" name="ProVince" id="pro">
+        <input type="submit" value="搜索">
+      </form>
+      <form action="http://127.0.0.1:5000/country" method="post">
+        <button>点击</button>
+      </form>
+    </search>
+  </header>
+  <!-- 在这里设置主页面 -->
+  <div class="main">
+    <div class="col">
+      <div class="palen">
+        <h2>各大洲数据展示</h2>
+        <div class="chart bar_1"></div>
+        <div class="palen_footer"></div>
+      </div>
+      <div class="palen">
+        <h2>世界疫情发展趋势</h2>
+        <div class="chart strip_1"></div>
+        <div class="palen_footer"></div>
+      </div>
+      <div class="palen">
+        <h2>各大洲占比情况</h2>
+        <div class="chart pea_1"></div>
+        <div class="palen_footer"></div>
+      </div>
+    </div>
+    <!-- 中间主面板显示 -->
+    <div class="col">
+      <div class="no">
+        <div class="no-hd">
+          <ul>
+            <li>{{number[1]}}</li>
+            <li>{{ChinaNum}}</li>
+          </ul>
+        </div>
+        <div class="no-bd">
+          <ul>
+            <li>世界确诊人数</li>
+            <li>中国确诊人数</li>
+          </ul>
+        </div>
+      </div>
+      <div class="map">
+        <div class="map_1"></div>
+        <div class="map_3"></div>
+        <div class="charts"></div>
+      </div>
+    </div>
+    <!-- == -->
+    <div class="col">   
+      <div class="palen">
+        <h2>中国疫情总体情况</h2>
+        <div class="chart strip_2"></div>
+        <div class="palen_footer"></div>
+      </div>
+      <div class="palen palen_spe">
+        <h2>各省状况实时展示</h2>
+        <table>
+          <tr>
+            <td>地区</td>
+            <td>确诊</td>
+            <td>死亡</td>
+            <td>治愈</td>
+          </tr>
+        </table>
+        <div class="chart showInfo">
+          <table>
+            {% for data in datalist%}
+            {% for item in data%}
+            <tr>
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{item[2]}}</td>
+              <td>{{item[3]}}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+          </table>
+        </div>
+        <div class="palen_footer"></div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <script src="../static/js/jquery.min.js"></script>
+  <script src="../static/js/flexible.js"></script>
+  <script src="../static/js/echarts.min.js"></script>
+  <script src="../static/js/china.js"></script>
+  <script src="../static/js/index.js"></script>
+  <script src="../static/js/setTime.js"></script>
+  <script src="../static/js/rotation.js"></script>
+  <script>
+    (function () {
+  var myCharts = echarts.init(document.querySelector(".bar_1"))
+  option = {
+    color: ["#2f89cf"],
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { // 坐标轴指示器，坐标轴触发有效
+        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+      }
+    },
+    grid: {
+      left: '0%',
+      right: '10%',
+      bottom: '0%',
+      top: "10%",
+      containLabel: true
+    },
+    xAxis: [{
+      type: 'category',
+      data:{{continentNameData|safe}},
+      axisTick: {
+        alignWithLabel: true
+      },
+      axisLabel: {
+        color: "rgba(255,255,255,.6)",
+        fontSize: "12"
+      },
+      axisLine: {
+        show: false,
+        // 如果想要设置单独的线条样式 
+      }
+    }],
+    yAxis: [{
+      type: 'value',
+      axisLabel: {
+        textStyle: {
+          color: "rgba(255,255,255,.6)",
+          fontSize: "12"
+        }
+      },
+      axisLine: {
+        lineStyle: {
+          color: "rgba(255,255,255,.1)",
+          // width: 1,
+          // type: "solid"
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: "rgba(255,255,255,.1)"
+        }
+      }
+    }],
+    series: [{
+      name: '直接访问',
+      type: 'bar',
+      barWidth: '35%',
+      data:{{continentConfiredData|safe}} ,
+      itemStyle: {
+        barBorderRadius: 5
+      }
+    }]
+  };
+  myCharts.setOption(option);
+  window.addEventListener("resize", function () {
+    myCharts.resize();
+  })
+})();
+// 这里设置的是地图
+(function () {
+  var myCharts = echarts.init(document.querySelector(".charts"))
+  window.dataList ={{provinceData|safe}};
+  option = {
+    tooltip: {
+      triggerOn: "click",
+      formatter: function (e, t, n) {
+        return .5 == e.value ? e.name + "：有疑似病例" : e.seriesName + "<br />" + e.name + "：" + e.value
+      }
+    },
+    visualMap: {
+      min: 0,
+      max: 1000,
+      left: 26,
+      bottom: 40,
+      showLabel: !0,
+      text: ["高", "低"],
+      pieces: [{
+        gt: 10000,
+        label: "> 10000 人",
+        color: "#7f1100"
+      }, {
+        gte: 1000,
+        lte: 10000,
+        label: "1000 - 10000 人",
+        color: "#ff5428"
+      }, {
+        gte: 500,
+        lte: 1000,
+        label: "500 - 1000 人",
+        color: "#ff5428"
+      },{
+        gte: 100,
+        lt: 500,
+        label: "100 - 500 人",
+        color: "#ff8c71"
+      }, {
+        gt: 0,
+        lt: 100,
+        label: "0-100",
+        color: "#ffd768"
+      }, {
+        value: 0,
+        color: "#ffffff"
+      }],
+      show: !0
+    },
+    geo: {
+      map: "china",
+      roam: !1,
+      scaleLimit: {
+        min: 1,
+        max: 2
+      },
+      zoom: 1.1,
+      top: 120,
+      label: {
+        normal: {
+          show: !0,
+          fontSize: "14",
+          color: "rgba(0,0,0,0.7)"
+        }
+      },
+      itemStyle: {
+        normal: {
+          //shadowBlur: 50,
+          //shadowColor: 'rgba(0, 0, 0, 0.2)',
+          borderColor: "rgba(0, 0, 0, 0.2)"
+        },
+        emphasis: {
+          areaColor: "#f2d5ad",
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          borderWidth: 0
+        }
+      }
+    },
+    series: [{
+      name: "确诊病例",
+      type: "map",
+      geoIndex: 0,
+      data: window.dataList
+    }]
+  };
+  myCharts.setOption(option);
+  window.addEventListener("resize", function () {
+    myCharts.resize();
+  });
+})();
+(function () {
+  // 基于准备好的dom，初始化echarts实例
+  var myChart = echarts.init(document.querySelector(".pea_1"));
+
+  option = {
+    tooltip: {
+      trigger: "item",
+      formatter: "{a} <br/>{b}: {c} ({d}%)",
+      position: function (p) {
+        //其中p为当前鼠标的位置
+        return [p[0] + 10, p[1] - 10];
+      }
+    },
+    legend: {
+      top: "90%",
+      itemWidth: 10,
+      itemHeight: 10,
+      data: {{continentNameData|safe}},
+      textStyle: {
+        color: "rgba(255,255,255,.5)",
+        fontSize: "12"
+      }
+    },
+    series: [{
+      name: "确诊人数",
+      type: "pie",
+      center: ["50%", "42%"],
+      radius: ["40%", "60%"],
+      color: [
+        "#065aab",
+        "#066eab",
+        "#0682ab",
+        "#0696ab",
+        "#06a0ab",
+        "#06b4ab",
+        "#06c8ab",
+        "#06dcab",
+        "#06f0ab"
+      ],
+      label: {
+        show: false
+      },
+      labelLine: {
+        show: false
+      },
+      data: {{continentList|safe}},
+    }]
+  };
+
+  // 使用刚指定的配置项和数据显示图表。
+  myChart.setOption(option);
+  window.addEventListener("resize", function () {
+    myChart.resize();
+  });
+})();
+  </script>
+</body>
+
+</html>

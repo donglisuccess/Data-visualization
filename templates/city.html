@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="../static/css/city.css">
+</head>
+
+<body>
+  <header>
+    <h1>
+      {{provinceName1}}省疫情情况分析
+    </h1>
+  </header>
+  <main>
+    <div class="charts">
+
+    </div>
+  </main>
+  <script src="../static/js/flexible.js"></script>
+  <script src="../static/js/echarts.min.js"></script>
+  <script>
+    var myCharts = echarts.init(document.querySelector(".charts"))
+    option = {
+      color:[ "#ed3f35", "#dddc6b","#00f2f1"],
+      legend: {},
+      tooltip: {},
+      dataset: {
+        dimensions: ['city', '确诊', '死亡', '治愈'],
+        source: {{ cityAllInfo | safe }}
+      },
+    xAxis: [{
+      type: 'category',
+      axisTick: {
+        alignWithLabel: true
+      },
+      axisLabel: {
+        color: "rgba(255,255,255,.8)",
+        fontSize: "14"
+      },
+      axisLine: {
+        show: false,
+        // 如果想要设置单独的线条样式 
+      }
+    }],
+      yAxis: [{
+        type: 'value',
+        axisLabel: {
+          textStyle: {
+            color: "rgba(255,255,255,.8)",
+            fontSize: "14"
+          }
+        },
+        axisLine: {
+          lineStyle: {
+            color: "rgba(255,255,255,.1)",
+            // width: 1,
+            // type: "solid"
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: "rgba(255,255,255,.1)"
+          }
+        }
+      }],
+        series: [
+          { 
+            type: 'bar', 
+            barWidth: '28%',
+            itemStyle: {
+            barBorderRadius: 5
+         }
+          },
+          { 
+            type: 'bar', 
+            barWidth: '28%',
+            itemStyle: {
+            barBorderRadius: 5
+          }
+          },
+          { 
+            type: 'bar', 
+            barWidth: '28%',
+            itemStyle: {
+            barBorderRadius: 5
+          }
+          },
+        ]
+    };
+    myCharts.setOption(option)
+    window.addEventListener("resize", function () {
+      myCharts.resize();
+    })
+  </script>
+</body>
+
+</html>

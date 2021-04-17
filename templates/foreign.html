@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="../static/css/city.css">
+</head>
+
+<body>
+  <header>
+    <h1>
+      {{requestCountry}}疫情数据
+    </h1>
+    <form action="http://127.0.0.1:5000/foreign" method="get">
+      <label for="pro"></label>
+      <input type="text" placeholder="请输入您要搜索的国家" name="foreign" id="pro">
+      <input type="submit" value="搜索">
+    </form>
+  </header>
+  <main>
+    <div style="color: white;">
+      {{foreign}}
+    </div>
+    <div class="charts">
+
+    </div>
+  </main>
+  <script src="../static/js/flexible.js"></script>
+  <script src="../static/js/echarts.min.js"></script>
+  <script>
+    var myCharts = echarts.init(document.querySelector(".charts"))
+    option = {
+      color: ["#00f2f1", "#ed3f35"],
+      tooltip: {
+        trigger: 'axis'
+      },
+      legend: {
+        right: "10%",
+        textStyle: {
+          color: "#4c9bfd",
+          fontSize: "15"
+        }
+      },
+      grid: {
+        top: "10%",
+        left: "15%",
+        right: "15%",
+        bottom: "10%",
+        show: true,
+        borderColor: "#012f4a",
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: {{cityName|safe}},
+        axisTick: {
+          show: false
+        },
+        axisLabel: {
+          textStyle: {
+            color: "rgba(255,255,255,.6)",
+            fontSize: "15"
+          }
+        },
+        axisLine: {
+          show: false
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisTick: {
+          show: false
+        },
+        axisLabel: {
+          textStyle: {
+            color: "rgba(255,255,255,.6)",
+            fontSize: "15"
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: "#012f4a"
+          }
+        }
+      },
+      series: [{
+        name: '累计确诊',
+        type: 'line',
+        stack: '总量',
+        smooth: true,
+        data: {{ cityConfirmed| safe}}
+      },
+    {
+      name: '累计治愈',
+        type: 'line',
+          stack: '总量',
+            smooth: true,
+              data: {{ cityDead| safe }},
+    },
+    ]
+  };
+    myCharts.setOption(option)
+  </script>
+</body>
+
+</html>
